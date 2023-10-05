@@ -30,7 +30,10 @@ const userSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Clothing' 
     }],
-
+    packing: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Clothing' 
+    }],
   },
   {
     // this second object adds extra properties: `createdAt` and `updatedAt`

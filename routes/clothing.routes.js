@@ -292,6 +292,91 @@ router.delete("/remove-from-laundry/:id", isAuthenticated, async (req, res) => {
   }
 });
 
+// Delete all packing for a specific user
+router.delete('/remove-from-packing/all', isAuthenticated, async (req, res) => {
+  const user = req.payload;
+
+  try {
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' }); // Updated the message
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
+      { $unset: { packing: 1 } }, 
+      { multi: true },
+    );
+    
+
+    console.log("Packing items deleted for user:", user._id);
+    
+    res.json({ message: 'All packing deleted', user: updatedUser });
+  } catch (error) {
+    console.error('Error deleting all packing:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+// Add to Packing List
+router.post(
+  "/clothing/add-to-packing/:id/",
+  isAuthenticated,
+  async (req, res) => {
+    const user = req.payload;
+    try {
+      const clothingId = req.params.id;
+
+      // Push the clothingId to the user's laundry array
+      await User.findByIdAndUpdate(user._id, {
+        $addToSet: { packing: clothingId },
+      });
+
+      // Send a response indicating success
+      res.json({ message: "Added to packing list" });
+    } catch (error) {
+      console.error("Error adding to packing list:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+);
+
+// display packing list
+
+router.get("/packing", isAuthenticated, async (req, res) => {
+  const user = req.payload;
+  try {
+    const packing = await User.findById(user._id).populate("packing");
+    res.json(packing);
+  } catch (error) {
+    console.error("Error getting packing list:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Remove from Packing List
+
+router.delete("/remove-from-packing/:id", isAuthenticated, async (req, res) => {
+  const user = req.payload;
+  try {
+    const clothingId = req.params.id;
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
+      { $pull: { packing: clothingId } },
+      { new: true }
+    );
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" }); // Updated the message
+    }
+    res.json({ message: "Removed from packing list", user: updatedUser });
+  } catch (error) {
+    console.error("Error removing from packing list:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // Exporting Express Router with all its routes
 
 module.exports = router;

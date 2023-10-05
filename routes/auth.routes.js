@@ -105,10 +105,10 @@ router.post("/login", (req, res, next) => {
 
       if (passwordCorrect) {
         // Deconstruct the user object to omit the password
-        const { _id, email, name, laundry } = foundUser;
+        const { _id, email, name, laundry,packing } = foundUser;
 
         // Create an object that will be set as the token payload
-        const payload = { _id, email, name, laundry};
+        const payload = { _id, email, name, laundry,packing};
 
         // Create a JSON Web Token and sign it
         const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
@@ -138,14 +138,16 @@ router.get("/verify", isAuthenticated, (req, res, next) => {
 router.get("/updateToken", isAuthenticated, async (req, res, next) => {
   const id = req.payload._id;
 
-
+  const user = await User.findById(id).populate(
+    "note userClothing laundry packing calendarClothing"
+  );
 
   const {
-    _id, email, name, laundry
+    _id, email, name, laundry, packing 
   } = user;
 
   // Create an object that will be set as the token payload
-  const payload = { _id, email, name, laundry};
+  const payload = { _id, email, name, laundry, packing };
 
   const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
     algorithm: "HS256",
