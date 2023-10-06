@@ -19,6 +19,12 @@ const { response } = require("../app");
 // How many rounds should bcrypt run the salt (default - 10 rounds)
 const saltRounds = 10;
 
+
+router.get("/signup" , (req,res)=> {
+  res.send("route is working")
+})
+  
+
 // POST /auth/signup  - Creates a new user in the database
 router.post("/signup", async (req, res, next) => {
   const { email, password, name } = req.body;

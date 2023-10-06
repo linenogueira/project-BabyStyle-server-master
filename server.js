@@ -1,8 +1,8 @@
 
 const express = require('express');
 const cors = require('cors'); // Import the cors package
+const app = require("./app");
 
-const app = express();
 
 // Configure CORS options (adjust as needed)
 const corsOptions = {

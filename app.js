@@ -15,11 +15,13 @@ const app = express();
 require("./config")(app);
 
 // 👇 Start handling routes here
+const authRoutes = require("./routes/auth.routes");
+app.use("/auth", authRoutes);
+
 const indexRoutes = require("./routes/index.routes");
 app.use("/api", indexRoutes);
 
-const authRoutes = require("./routes/auth.routes");
-app.use("/auth", authRoutes);
+
 
 const clothingRoutes = require("./routes/clothing.routes");
 app.use("/api", clothingRoutes);
