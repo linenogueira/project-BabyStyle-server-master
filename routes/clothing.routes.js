@@ -1,21 +1,65 @@
-const express = require("express")
-const router = express.Router()
-const {isAuthenticated} = require("../middleware/jwt.middleware")
+//Require Packages / Packages Functionalities
+
+const router = require("express").Router();
+
+const mongoose = require("mongoose");
+// ********* require fileUploader in order to use it *********
 const fileUploader = require("../config/cloudinary.config");
 
+const { isAuthenticated } = require("../middleware/jwt.middleware");
+
+// Require Data Models
+const Clothing = require("../models/Clothing.model");
+const Note = require("../models/Note.model");
+const User = require("../models/User.model");
+const Scheduler = require("../models/Scheduler.model");
+
+//POST ROUTE that Creates a new Clothing
+router.post("/clothing/create", isAuthenticated, async (req, res) => {
+  const user = req.payload;
+  const {
+    title,
+    image,
+    type,
+    size,
+    color,
+    brand,
+    description,
+    careInstructions,
+    season,
+  } = req.body;
+  try {
+    let newClothes = await Clothing.create({
+      title,
+      image,
+      type,
+      size,
+      color,
+      brand,
+      description,
+      careInstructions,
+      season,
+    });
+
+    await User.findByIdAndUpdate(user._id, {
+      $push: { userClothing: newClothes._id },
+    });
+    res.json(newClothes);
+  } catch (error) {
+    res.json(error);
+  }
+});
+
+//GET ROUTE that gets all the Clothings
+
 router.get("/clothing", isAuthenticated, async (req, res) => {
-  const {_id} = req.payload;
-
-  console.log("ID FROM THE USER",_id)
-  
-  User.findById(_id)
-  .then((user)=> {
-    res.status(200).json({clothes: user.userClothing})
-  })
-  .catch((error)=> {
-
-    res.status(500).json({errorMessage: "error occured"})
-  })  
+  const user = req.payload;
+  try {
+    let allClothings = await User.findById(user._id).populate("userClothing");
+    res.json(allClothings);
+  } catch (error) {
+    res.json(error);
+  }
 });
 
 router.post(
@@ -166,6 +210,7 @@ router.put(
 );
 
 
+
 // Add to Laundry
 router.post(
   "/clothing/add-to-laundry/:id/",
@@ -247,6 +292,7 @@ router.delete("/remove-from-laundry/:id", isAuthenticated, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 // Delete all packing for a specific user
 router.delete('/remove-from-packing/all', isAuthenticated, async (req, res) => {
