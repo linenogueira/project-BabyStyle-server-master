@@ -5,32 +5,32 @@ const express = require("express");
 // https://www.npmjs.com/package/morgan
 const logger = require("morgan");
 
-// https://www.npmjs.com/package/path
-const path = require("path");
-
 // ℹ️ Needed when we deal with cookies (we will when dealing with authentication)
 // https://www.npmjs.com/package/cookie-parser
 const cookieParser = require("cookie-parser");
 
-const cors = require("cors"); // <== IMPORT
+// ℹ️ Needed to accept requests from 'the outside'. CORS stands for cross origin resource sharing
+// unless the request is made from the same domain, by default express wont accept POST requests
+const cors = require("cors");
+
+
+ const FRONTEND_URL = "http://localhost:5173"
 
 // Middleware configuration
 module.exports = (app) => {
-  // Because this is a server that will accept requests from outside and it will be hosted ona server with a `proxy`, express needs to know that it should trust that setting.
-  // Services like heroku use something called a proxy and you need to add this to your server
+  // Because this will be hosted on a server that will accept requests from outside and it will be hosted ona server with a `proxy`, express needs to know that it should trust that setting.
+  // Services like Fly use something called a proxy and you need to add this to your server
   app.set("trust proxy", 1);
 
+  // controls a very specific header to pass headers from the frontend
   app.use(
     cors({
-      origin: [process.env.CLIENT_URL],
+      origin: [FRONTEND_URL, "http://localhost:5173"],
     })
   );
 
   // In development environment the app logs
   app.use(logger("dev"));
-
-   // AHandles access to the public folder
-   app.use(express.static(path.join(__dirname, "..", "public")));
 
   // To have access to `body` property in the request
   app.use(express.json());
